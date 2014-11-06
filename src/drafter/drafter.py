@@ -1,60 +1,80 @@
 #!/usr/bin/env python      
 import json
-from Tkinter import *   
 import Tkinter as tk
+import os
 
 # Import Player data from json/players.json
 json_file = open('../../json/players.json')
 players_json = json.load(json_file)
 players = players_json['Players']
+json_file.close() 
+
+results = open('../../html/results.html', 'w')
+results.write('<!DOCTYPE html> \n <html>\n <body> \n')
+results.write('<h1>Draft Summary</h1>\n')
+results.write('<table>\n<tr><th>Player</th><th>Position</th></tr>\n')
 
 # A list of all the names of the players
 names = []
 for i in range(len(players)):
     if players[i]['active'] == '1':
-        names.insert(len(names), players[i]['fname'] + ' ' + players[i]['lname'])
+        names.insert(len(names), players[i]['displayName'] + ' ' + players[i]['position'])
 # Set to 100, experimenting with how many the drop down menu can handle.
-names = names[0:100]
-
+names = names[:2000:20]
+# Number of players drafted per team
+draft_player_size = 15
 
 count = 0 
 def draft(): 
-    global menuChoice
-    labelText.set('You drafted ' + menuChoice.get()) 
-    global count, names 
-    names.remove(menuChoice.get())
+    global menuChoice, count, names, app, draft_player_size
+    choice = menuChoice.get()
+    labelText.set('You drafted ' + choice + '!')
+    if choice[-1] !=  'K':
+        results.write('<tr><td>' + choice[:len(choice)-3] + '</td>\n')
+        results.write('<td>' + choice[len(choice)-3:] + '</td></tr>\n')
+    else:
+        results.write('<tr><td>' + choice[:len(choice)-1] + '</td>\n')
+        results.write('<td>' + choice[len(choice)-1:] + '</td></tr>\n')
+    names.remove(choice)
     menuChoice.set(names[0])
     option['menu'].delete(0, 'end')
     for n in names:
         option['menu'].add_command(label=n, command=tk._setit(menuChoice, n))
     count += 1
-    numPlayersText.set(str(count) + ' Players drafted')
+    numPlayersText.set(str(count) + ' Players drafted out of ' + str(draft_player_size))
+    if count == draft_player_size:
+        app.quit()
+        results.write('</table> </body> \n </html>')
+        results.close()
+        os.system('google-chrome ../../html/results.html')
     return
 
-app = Tk()
+
+app = tk.Tk()
 app.title('Fantasy Football Drafter')
 app.geometry('600x400')
 
-labelText = StringVar()
+labelText = tk.StringVar()
 labelText.set('Click to draft')
-label1 = Label(app, textvariable=labelText, height=2)
+label1 = tk.Label(app, textvariable=labelText, height=2)
 label1.pack()
 
-numPlayersText = StringVar()
-numPlayersText.set('0 Players drafted')
-label2 = Label(app, textvariable=numPlayersText, height=2)
+numPlayersText = tk.StringVar()
+numPlayersText.set('0 Players drafted out of ' + str(draft_player_size))
+label2 = tk.Label(app, textvariable=numPlayersText, height=2)
 label2.pack()
 
-menuChoice = StringVar(app)
+menuChoice = tk.StringVar(app)
 menuChoice.set(names[0])
 
 
-option = OptionMenu(app, menuChoice, *names)
+option = tk.OptionMenu(app, menuChoice, *names)
 option.pack()
 
 # Button 
-button1 = Button(app, text="Draft player", width=20, command=draft)
+button1 = tk.Button(app, text="Draft player", width=20, command=draft)
 button1.pack(padx=15, pady=15)
 
 
-app.mainloop()                        
+app.mainloop()
+
