@@ -17,27 +17,27 @@ if (!$link) {
 }
 echo "Connected to MySQL server successfully\n";
 mysql_select_db($db_database)
-	or die("Unable to select database: " . mysql_error());
+    or die("Unable to select database: " . mysql_error());
 
 // Drop players table if exists 
 $query =  "DROP TABLE IF EXISTS players";
 $result = mysql_query($query);
 if (!$result) {
-	die("Database access failed: " . mysql_error());
+    die("Database access failed: " . mysql_error());
 }
 
-// Create Players table if it exists 
+// Create players table 
 $query =  "CREATE TABLE players(
-	player_id INTEGER AUTO_INCREMENT,
-	name VARCHAR(32) NOT NULL,
-	position VARCHAR(3) NOT NULL,
+    player_id INTEGER AUTO_INCREMENT,
+    name VARCHAR(32) NOT NULL,
+    position VARCHAR(3) NOT NULL,
     team CHAR(3) NOT NULL, 
-	active INTEGER,
+    active INTEGER,
     PRIMARY KEY (player_id)
 )";
 $result = mysql_query($query);
 if (!$result) {
-	die("Database access failed: " . mysql_error());
+    die("Database access failed: " . mysql_error());
 }
 echo 'Players table created succesfully';
 
@@ -50,18 +50,18 @@ $num_players = count($players);
 // Insert players data
 $query =  "INSERT INTO players VALUES ";
 for ($j = 0; $j < $num_players; ++$j) {
-	$query = $query . '(NULL, ' 
-	. '\'' . mysql_real_escape_string($players[$j]->displayName) . '\'' . ', '
-	. '\'' . mysql_real_escape_string($players[$j]->position)    . '\'' . ', ' 
-	. '\'' . mysql_real_escape_string($players[$j]->team)        . '\'' . ', ' 
-	. $players[$j]->active . ')';
-	if ($j < $num_players - 1) {
-		$query = $query . ', ';
-	}	
+    $query = $query . '(NULL, ' 
+    . '\'' . mysql_real_escape_string($players[$j]->displayName) . '\'' . ', '
+    . '\'' . mysql_real_escape_string($players[$j]->position)    . '\'' . ', ' 
+    . '\'' . mysql_real_escape_string($players[$j]->team)        . '\'' . ', ' 
+    . $players[$j]->active . ')';
+    if ($j < $num_players - 1) {
+        $query = $query . ', ';
+    }    
 }
 $result = mysql_query($query);
 if (!$result) {
-	die("Database access failed: " . mysql_error());
+    die("Database access failed: " . mysql_error());
 }
 
 echo 'Player data added successfully';
