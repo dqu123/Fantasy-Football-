@@ -39,7 +39,7 @@ $result = mysql_query($query);
 if (!$result) {
     die("Database access failed: " . mysql_error());
 }
-echo 'Players table created succesfully';
+echo "Players table created succesfully\n";
 
 // Fetch players data from json file
 $p_json = file_get_contents('../../json/players.json');
@@ -64,6 +64,55 @@ if (!$result) {
     die("Database access failed: " . mysql_error());
 }
 
-echo 'Player data added successfully';
+echo "Player data added successfully\n";
+
+// Drop weekly_stats table if exists 
+$query =  "DROP TABLE IF EXISTS weekly_stats";
+$result = mysql_query($query);
+if (!$result) {
+    die("Database access failed: " . mysql_error());
+}
+
+// Create players table 
+$query =  "CREATE TABLE weekly_stats(
+	stat_id INTEGER AUTO_INCREMENT,
+	week INTEGER NOT NULL,
+	name VARCHAR(32) NOT NULL, 
+	position VARCHAR(3) NOT NULL,
+	standard NUMERIC(12, 2) NOT NULL,
+    team CHAR(3) NOT NULL, 
+    PRIMARY KEY (stat_id)
+)";
+$result = mysql_query($query);
+if (!$result) {
+    die("Database access failed: " . mysql_error());
+}
+echo "weekly_stats table created succesfully\n";
+
+// Fetch weekly_stats data from json file
+for ($i = 0; $i < 10; $i++) {
+	$s_json = file_get_contents('../../json/week' . strval($i + 1) . 'all.json');
+	$rankings = json_decode($s_json); 
+	$rankings = $rankings->{'Rankings'};
+	$num_players = count($rankings);
+	// Insert players data
+	$query =  "INSERT INTO weekly_stats VALUES ";
+	for ($j = 0; $j < $num_players; ++$j) {
+		$query = $query . '(NULL, '
+		. '\'' . mysql_real_escape_string($rankings[$j]->week)    . '\'' . ', ' 
+		. '\'' . mysql_real_escape_string($rankings[$j]->{'name'}) . '\'' . ', '
+		. '\'' . mysql_real_escape_string($rankings[$j]->position)    . '\'' . ', ' 
+		. '\'' . mysql_real_escape_string($rankings[$j]->standard)    . '\'' . ', ' 
+		. '\'' . mysql_real_escape_string($rankings[$j]->team)        . '\'' . ')';
+		if ($j < $num_players - 1) {
+			$query = $query . ', ';
+		}    
+	}
+	$result = mysql_query($query);
+	if (!$result) {
+		die("Database access failed: " . mysql_error());
+	}
+}
+echo "weekly data added successfully\n";
 
 ?>
